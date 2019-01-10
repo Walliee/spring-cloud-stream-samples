@@ -49,12 +49,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  * @author Ilayaperumal Gopinathan
  * @author Soby Chacko
  */
-@EnableBinding
 @Controller
 public class SourceWithDynamicDestination {
-
-	@Autowired
-	private BinderAwareChannelResolver resolver;
 
 	@Autowired
 	@Qualifier("sourceChannel")
@@ -69,20 +65,6 @@ public class SourceWithDynamicDestination {
 	private void sendMessage(Object body, Object contentType) {
 		localChannel.send(MessageBuilder.createMessage(body,
 				new MessageHeaders(Collections.singletonMap(MessageHeaders.CONTENT_TYPE, contentType))));
-	}
-
-	@Bean(name = "sourceChannel")
-	public MessageChannel localChannel() {
-		return new DirectChannel();
-	}
-
-	@Bean
-	@ServiceActivator(inputChannel = "sourceChannel")
-	public ExpressionEvaluatingRouter router() {
-		ExpressionEvaluatingRouter router = new ExpressionEvaluatingRouter(new SpelExpressionParser().parseExpression("payload.id"));
-		router.setDefaultOutputChannelName("default-output");
-		router.setChannelResolver(resolver);
-		return router;
 	}
 
 	//Following sink is used as test consumer. It logs the data received through the consumer.
